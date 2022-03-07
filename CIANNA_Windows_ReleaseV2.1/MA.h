@@ -3,13 +3,14 @@
 #include "MPP.h"
 
 struct ExtendedIndividual {
-	MPP ind;
+        MPP ind;
 	int dist;
 };
 class MA {
 	public:
 		MA(int N_, double pc_, double pm_, double finalTime_);
-		void run();
+		void run(int minimumLS);
+		void runMemetic();
 	private:
 		//Parameters of MA
 		int N;//Population Size
@@ -25,7 +26,14 @@ class MA {
 		void mutation();
 		void localSearch();
 		void replacement();
-public:
+		int getRandomInteger0_N(int n){ 
+                   return (int) ((n + 1.0)*rand()/(RAND_MAX+1.0));
+                }
+
+                double generateRandomDouble0_Max(double maxValue){
+	               return (double)(rand()) / RAND_MAX * maxValue;
+                }
+         public:
 		//Internal attributes of MA
 		vector< ExtendedIndividual * > population; 
 		vector< ExtendedIndividual * > parents;
@@ -34,5 +42,4 @@ public:
 		double DI;
 		double timeLS;
 };
-
 #endif

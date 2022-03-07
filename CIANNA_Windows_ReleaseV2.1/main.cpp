@@ -1,4 +1,12 @@
+#include <bits/stdc++.h>
+using namespace std;
 #include "MA.h"
+#include "global.h"
+extern int g_N;
+extern double g_pc;
+extern double g_pm;
+extern double g_pm;
+extern double g_finalTime;
 /*
    Input arguments:
    1) file of Dishes information
@@ -7,64 +15,18 @@
    4) Time
    5) out file
 */
-//int crossoverType;
 int main(int argc, char **argv){
+	srand(time(NULL));
 
-	srand(1); //check this!!! ??
-//	srand(time(NULL)); //check this!!! ??
-	int N = 10;
-	double pc = 1.0;
-	double pm = 0.01;
-	double finalTime = atof(argv[4])*60;//25 * 60;
-	vector<vector<int>> conf_day, opt_conf(N_OPT_DAY), unique_opt_time(N_TIMES);
-        vector<int> inv_unique_opt_time(N_OPT_DAY);
-	conf_day.push_back({BREAKFAST, MORNING_SNACK, STARTER_1, MAIN_COURSE_1, EVENING_SNACK, DINNER});
-	conf_day.push_back({BREAKFAST, MORNING_SNACK, STARTER_2, MAIN_COURSE_2, EVENING_SNACK, DINNER});
-	for(int i = 0; i < conf_day.size(); i++)
-	{
-	   for(int j = 0; j  < conf_day[i].size(); j++)
-	   {
-	     opt_conf[conf_day[i][j]].push_back(i);//it maps a day configuration with the encoded individual day..
-	     if( find(unique_opt_time[j].begin(), unique_opt_time[j].end(), conf_day[i][j]) == unique_opt_time[j].end() )
- 	     unique_opt_time[j].push_back(conf_day[i][j]);
-	     inv_unique_opt_time[conf_day[i][j]] = j;
-	   }
-	}
-
-	crossoverType= PAIR_BASED_CROSSOVER;//UNIFORM_CROSSOVER; //UNIFORM2_CROSSOVER, PAIR_BASED_CROSSOVER
-
+	g_finalTime = atof(argv[4])*60;//25 * 60;
 	//loading the input data...
-	MPP_Problem STP;
+	MPP STP;
         STP.load_data(argc, argv);
-	STP.conf_day = conf_day;
-	STP.opt_conf = opt_conf;
-	STP.unique_opt_time = unique_opt_time;
-	STP.inv_unique_opt_time = inv_unique_opt_time;
-//	STP.weights =  {0.15, 0.3, 0.05, 0.05, 0.3, 0.15};
-	STP.weights =  {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-
 	MPP::MPP_problem = &STP;
-
         //everithing seem's to be OK, thus starting the algorithm...
-	MA ma(N, pc, pm, finalTime);
-        //get the time needed to attain a feasible solution..	
- 	ExtendedIndividual *ei = new ExtendedIndividual();
-	ei->ind.init();
-  	double ls_time = ei->ind.localSearch_testing_time(finalTime);
-//	cout << ls_time<<endl;
-        if(ls_time*10*N > finalTime)
-	{
-//		cout << "ls"<<endl;
-	        ei->ind.localSearch(finalTime-ls_time);
-		ei->ind.exportcsv();
-//		cout << ei->ind.fitness<<endl;
-	}
-	else
-	{
-//	   cout << "memetic"<<endl;
-	  finalTime -=ls_time;
-	   ma.timeLS = 10*ls_time;
-	   ma.run();
-	}
-	delete ei;
+	MA ma(g_N, g_pc, g_pm, g_finalTime);
+	//minimum amount of local searches that should be applied
+	//if there is not enough time then it applies just local searches
+	int minimumLS=10*g_N; //ten times the population size
+	ma.run(minimumLS);
 }

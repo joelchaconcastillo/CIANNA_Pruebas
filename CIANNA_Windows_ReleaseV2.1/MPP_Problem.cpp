@@ -1,44 +1,45 @@
 #include "MPP_Problem.h"
+#include "global.h"
 
 const string WHITESPACE = " \n\r\t\f\v";
-string ltrim(const string& s)
-{
+extern vector<vector<int>> g_Idtime2Configs;
+extern vector<vector<int>> g_time2Ids;
+extern vector<vector<int>> g_timesIdPerConf;
+extern int g_crossoverType;
+extern vector<double> g_weights;
+
+MPP_Problem::MPP_Problem(){
+}
+string ltrim(const string& s){
 	size_t start = s.find_first_not_of(WHITESPACE);
 	return (start == std::string::npos) ? "" : s.substr(start);
 }
-
-string rtrim(const string& s)
-{
+string rtrim(const string& s){
 	size_t end = s.find_last_not_of(WHITESPACE);
 	return (end == std::string::npos) ? "" : s.substr(0, end + 1);
 }
-
-string trim(const string& s)
-{
+string trim(const string& s){
 	return rtrim(ltrim(s));
-}
-MPP_Problem::MPP_Problem(){
 }
 int MPP_Problem::random_dish(int time_dish){
    return rand()%((int)v_opt_dishes[time_dish].size());
 }
-void MPP_Problem::load_data(int argc, char **argv)
-{
+void MPP_Problem::load_data(int argc, char **argv){
     if(argc < 6)
     {
 	 cout << "N\'umero de argumentos inv\'alidos" <<endl;
 	 exit(EXIT_FAILURE);
     }
-    out_filename = string(argv[5]);
-    nDias = atoi(argv[3]);
-
-    ////reading the information.......
     v_opt_dishes.assign(N_OPT_DAY, vector<infoDishes>()); //N_times_dishes...
+    nDias = atoi(argv[3]);
+    out_filename = string(argv[5]);
+    //note: always load constraints before load dishes..
     load_constraints(argv[2]);
     load_dishes(argv[1]);
+
+    ////reading the information.......
 }
-void MPP_Problem::load_dishes(char *c_filename)
-{
+void MPP_Problem::load_dishes(char *c_filename){
         max_description_id = 0;
    	ifstream ifs;
 	struct infoDishes str_dish;
@@ -90,8 +91,8 @@ void MPP_Problem::load_dishes(char *c_filename)
 	       max_description_id = max(max_description_id, str_dish.description);
 	       if(cell.empty()) break; //The file has an extra empty line
 
-	       if(str_dish.time_day == "DESAYUNO") v_opt_dishes[BREAKFAST].push_back(str_dish);
-	       else if(str_dish.time_day == "COLACION_MATUTINA") v_opt_dishes[MORNING_SNACK].push_back(str_dish);
+	       if(str_dish.time_day == "DESAYUNO") v_opt_dishes[BREAKFAST_1].push_back(str_dish);
+	       else if(str_dish.time_day == "COLACION_MATUTINA") v_opt_dishes[MORNING_SNACK_1].push_back(str_dish);
 	   //    else if(str_dish.time_day == "COMIDA_ENTRADA") v_opt_dishes[STARTER].push_back(str_dish);
 //	       else if(str_dish.time_day == "COMIDA_ENTRADA" && str_dish.category == CATEGORY_1) v_opt_dishes[STARTER_1].push_back(str_dish);
 //	       else if(str_dish.time_day == "COMIDA_ENTRADA" && str_dish.category == CATEGORY_2) v_opt_dishes[STARTER_2].push_back(str_dish);
@@ -110,12 +111,12 @@ void MPP_Problem::load_dishes(char *c_filename)
 		  v_opt_dishes[MAIN_COURSE_1].push_back(str_dish);
 		  v_opt_dishes[MAIN_COURSE_2].push_back(str_dish);
 		}
-	       else if(str_dish.time_day == "COLACION_VESPERTINA") v_opt_dishes[EVENING_SNACK].push_back(str_dish);
-	       else if(str_dish.time_day == "CENA") v_opt_dishes[DINNER].push_back(str_dish);
+	       else if(str_dish.time_day == "COLACION_VESPERTINA") v_opt_dishes[EVENING_SNACK_1].push_back(str_dish);
+	       else if(str_dish.time_day == "CENA") v_opt_dishes[DINNER_1].push_back(str_dish);
 	       else if(str_dish.time_day == "COLACION_AMBAS")
 	       {
- 		 v_opt_dishes[MORNING_SNACK].push_back(str_dish);
- 		 v_opt_dishes[EVENING_SNACK].push_back(str_dish);
+ 		 v_opt_dishes[MORNING_SNACK_1].push_back(str_dish);
+ 		 v_opt_dishes[EVENING_SNACK_1].push_back(str_dish);
 	       }
 	       else
 	       {
@@ -137,12 +138,8 @@ void MPP_Problem::load_dishes(char *c_filename)
 		cout << "\n\nError. No se ha podido leer el archivo de platos."<<endl;
 		exit(EXIT_FAILURE);
 	}
-//	cout << "platillos... " <<endl;
-//       for(int i = 0; i < N_OPT_DAY; i++) cout << v_opt_dishes[i].size() << " ";
-//       cout << endl;
 }
-void MPP_Problem::load_constraints(char *c_filename)
-{
+void MPP_Problem::load_constraints(char *c_filename){
    	ifstream ifs;
 	struct constraint_nutrient str_constraint_nutrient;
 	ifs.open(c_filename, ifstream::in);
@@ -192,24 +189,23 @@ void MPP_Problem::load_constraints(char *c_filename)
 		exit(EXIT_FAILURE);
 	}
 }
-void MPP_Problem::exportcsv(vector<int> &x_var)
-{
+void MPP_Problem::exportcsv(vector<int> &x_var){
    ofstream ofs;
    ofs.open(out_filename.c_str());
    ofs << "DIA ";
    set<int> times_selected_per_day;
-   for(int i = 0; i < conf_day.size(); i++)
-     for(auto t =conf_day[i].begin(); t != conf_day[i].end(); t++) times_selected_per_day.insert(*t);
+   for(int i = 0; i < g_timesIdPerConf.size(); i++)
+     for(auto t =g_timesIdPerConf[i].begin(); t != g_timesIdPerConf[i].end(); t++) times_selected_per_day.insert(*t);
    for(auto a = times_selected_per_day.begin(); a != times_selected_per_day.end(); a++)
    {
-	   if(*a == BREAKFAST) ofs << " , DESAYUNO ";
-	   if(*a == MORNING_SNACK) ofs << " , COLACION_MATUTINA ";
+	   if(*a == BREAKFAST_1) ofs << " , DESAYUNO ";
+	   if(*a == MORNING_SNACK_1) ofs << " , COLACION_MATUTINA ";
 	   if(*a == STARTER_1) ofs << " , COMIDA_ENTRADA ";
 	   if(*a == STARTER_2) ofs << " , COMIDA_ENTRADA ";
 	   if(*a == MAIN_COURSE_1) ofs << " , COMIDA_PRINCIPAL ";
 	   if(*a == MAIN_COURSE_2) ofs << " , COMIDA_PRINCIPAL ";
-	   if(*a == EVENING_SNACK) ofs << " , COLACION_VESPERTINA ";
-	   if(*a == DINNER) ofs << " , CENA ";
+	   if(*a == EVENING_SNACK_1) ofs << " , COLACION_VESPERTINA ";
+	   if(*a == DINNER_1) ofs << " , CENA ";
    }
 //   ofs<<"DIA , DESAYUNO , COLACION_MATUTINA , COMIDA_ENTRADA , COMIDA_ENTRADA , COMIDA_PRINCIPAL , COMIDA_PRINCIPAL , COLACION_VESPERTINA , CENA ";
    //ofs<<"DIA , DESAYUNO , COLACION_MATUTINA , COMIDA_ENTRADA , COMIDA_PRINCIPAL , COLACION_VESPERTINA , CENA ";
@@ -224,10 +220,10 @@ void MPP_Problem::exportcsv(vector<int> &x_var)
     	   for(auto ij = dic_nut_id.begin(); ij !=  dic_nut_id.end(); ij++)
 	   {
 		ofs <<" , \" (";
-		for(int c = 0; c < conf_day.size(); c++)
+		for(int c = 0; c < g_timesIdPerConf.size(); c++)
 		{
 		double sum_nut = 0.0;
-     		  for(auto t =conf_day[c].begin(); t != conf_day[c].end(); t++)
+     		  for(auto t = g_timesIdPerConf[c].begin(); t != g_timesIdPerConf[c].end(); t++)
 	              sum_nut +=v_opt_dishes[*t][x_var[i*N_OPT_DAY + (*t)]].v_nutrient_value[ij->second];
 			if( c>0) ofs<<",";
 			ofs <<sum_nut ;

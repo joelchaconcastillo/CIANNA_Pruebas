@@ -8,9 +8,8 @@
 #include <sys/time.h>
 #include <iostream>
 #include <signal.h>
-
 #include "MA.h"
-#include "utils.h"
+#include "global.h"
 
 using namespace std;
 /*
@@ -176,8 +175,7 @@ void MA::initDI(){
 	meanDistance /= (population.size() * (population.size() - 1)) / 2;
 	DI = meanDistance * 1;
 }
-
-void MA::run(){
+void MA::runMemetic(){
 	initPopulation();
 	initDI();
 	int generation = 0;
@@ -208,5 +206,34 @@ void MA::run(){
 	   indexBest = i;
         }
 	population[indexBest]->ind.exportcsv();
+
+}
+/*
+ *This function 
+ * */
+void MA::run(int minimumLS){
+        //get the time needed to attain a feasible solution..	
+ 	ExtendedIndividual *ei = new ExtendedIndividual();
+	//init individual
+	ei->ind.init();
+	/*
+	 *This local search measures the total time needed to calculate a feasible solution
+	 *if time allows it then is applied a memetic algorithm otherwise a local search.
+	 * */
+  	//double ls_time = ei->ind.localSearch_testing_time(finalTime);
+        bool isMeasuringTime=false;
+  	double ls_time = ei->ind.localSearch(finalTime, isMeasuringTime);
+        if(ls_time*minimumLS > finalTime)
+	{
+	  ei->ind.localSearch(finalTime-ls_time);
+	  ei->ind.exportcsv();
+	}
+	else{
+	  finalTime -=ls_time;
+	  timeLS = 10*ls_time;
+	  runMemetic();
+	}
+	delete ei;
+
 }
 
