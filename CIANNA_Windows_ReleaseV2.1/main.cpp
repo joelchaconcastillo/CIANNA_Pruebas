@@ -17,9 +17,10 @@ extern double g_finalTime;
 */
 int main(int argc, char **argv){
 	srand(time(NULL));
-
+	srand(1);
 	g_finalTime = atof(argv[4])*60;//25 * 60;
-	//loading the input data...
+	//loading information for the problem
+	//note that MPP is a derived class of MPP_Problem.
 	MPP STP;
         STP.load_data(argc, argv);
 	MPP::MPP_problem = &STP;
@@ -27,6 +28,6 @@ int main(int argc, char **argv){
 	MA ma(g_N, g_pc, g_pm, g_finalTime);
 	//minimum amount of local searches that should be applied
 	//if there is not enough time then it applies just local searches
-	int minimumLS=10*g_N; //ten times the population size
+	int minimumLS=LOWEST_NUMBER_OF_GENERATIONS*g_N; //ten times the population size
 	ma.run(minimumLS);
 }

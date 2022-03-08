@@ -206,6 +206,7 @@ void MA::runMemetic(){
 	   indexBest = i;
         }
 	population[indexBest]->ind.exportcsv();
+	cout << population[indexBest]->ind.fitness;
 
 }
 /*
@@ -221,16 +222,19 @@ void MA::run(int minimumLS){
 	 *if time allows it then is applied a memetic algorithm otherwise a local search.
 	 * */
   	//double ls_time = ei->ind.localSearch_testing_time(finalTime);
-        bool isMeasuringTime=false;
+        bool isMeasuringTime=true;
   	double ls_time = ei->ind.localSearch(finalTime, isMeasuringTime);
-        if(ls_time*minimumLS > finalTime)
-	{
+	cout << ls_time<<" " <<finalTime<<endl;
+        if(ls_time*minimumLS > finalTime){
+	cout<<"LOCAL_SEARCH..."<<endl;
 	  ei->ind.localSearch(finalTime-ls_time);
+	  cout << ei->ind.fitness<<endl;
 	  ei->ind.exportcsv();
 	}
 	else{
+		cout <<"MEMETIC..."<<endl;
 	  finalTime -=ls_time;
-	  timeLS = 10*ls_time;
+	  timeLS = FACTOR_TIME_PER_LOCAL_SEARCH*ls_time;
 	  runMemetic();
 	}
 	delete ei;

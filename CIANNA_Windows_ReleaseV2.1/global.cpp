@@ -14,6 +14,8 @@ double g_pc=1;
 double g_pm=0.01;
 //Stopping criterion set by time in minutes
 double g_finalTime=1;
+
+
 /*
   Each of six times has several options of dishes 
 
@@ -82,4 +84,24 @@ int g_crossoverType=PAIR_BASED_CROSSOVER;
 /**
  * Weight applied to penalize variability
  * */
-vector<double> g_weights={W_VAR_BREAKFAST, W_VAR_MORNING_SNACK, W_VAR_STARTER, W_VAR_MAIN_COURSE, W_VAR_EVENING_SNACK, W_VAR_DINNER};
+//This rank is added to each normalized score in variability terms, in this way there is a rank between times, this avoid tradeoff between times regarding variability
+//A higher rank gives more relevance to the time since the problem is of minimization, note that it begins with 7 since there a different kind of varibility which is by categories.
+//TIMES				   ||  rank
+//========================================
+//MORNING_SNACK, EVENING_SNACK     ||  7
+//BREAKFAST, DINNER		   ||  8
+//STARTER                          ||  9
+//MAIN_COURSE                      ||  10
+///////////////////////////////////////
+vector<double> g_rank={8, 7, 9, 10, 7, 8};
+
+//This is applied in a similar way than the previous rank, instead this rank is lower resulting in a less relevance principle.
+//TIMES				   ||  rank
+//========================================
+//MORNING_SNACK, EVENING_SNACK     ||  1
+//BREAKFAST, DINNER		   ||  2
+//STARTER                          ||  3
+//MAIN_COURSE                      ||  4
+///////////////////////////////////////
+vector<double> g_rank_category={2, 1, 3, 4, 1, 2};
+

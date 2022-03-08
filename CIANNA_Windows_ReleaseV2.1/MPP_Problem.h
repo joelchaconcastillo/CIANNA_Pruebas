@@ -32,7 +32,6 @@ class MPP_Problem{
 		 unordered_map<string, int> dic_nut_id;
 		 vector<int> v_constraint_global, v_constraint_day;
 		 string out_filename;
-		 int max_description_id;
-		 int nDias;
+		 int max_description_id, nDias, num_nutr;
 };
 

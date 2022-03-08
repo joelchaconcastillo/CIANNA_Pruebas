@@ -2,6 +2,10 @@
 #define H_GLOBAL
 #include <bits/stdc++.h>
 using namespace std;
+
+
+///SYSTEM TAGS ///////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 #define EPSILON 1e-10
 #define N_CATEGORIES 3
 #define CATEGORY_1 1
@@ -38,32 +42,33 @@ using namespace std;
 #define PAIR_BASED_CROSSOVER 1
 #define UNIFORM_CROSSOVER 2
 #define UNIFORM2_CROSSOVER 3
-/***
- * USER PARAMETERS
- * */
 
+//////////////////////////////////////////////////
+///USER PARAMETERS TAGS
+//These parameters should be fitted as is desired
+//////////////////////////////////////////////////
 
+//The lowest number of generations required to apply a memetic algorithm
+//this numbers is calculated based on the time required to find a feasible solution
+#define LOWEST_NUMBER_OF_GENERATIONS 10
+
+//This factor extends time applied to each local search for each generation in the memetic algorithm,
+//which is multiplied by the lowest time in a local search to attain a feasible solution
+//note that as this value is longer a high intensification for each local search might be applied
+//and might be a good parameter to tunne for the most challenging instances
+#define FACTOR_TIME_PER_LOCAL_SEARCH 10
+
+//This defines the minimum days allowed for  repetition
 #define DAYS_FAVORITE 7*3
 #define DAYS_NO_FAVORITE 7*4
 
 //Iterations applied inside the local search
-#define ITERATIONS_LS 100
 #define MAX_ITE_ONE_DAY_LS 200
 
+///////////////////////////////////////////////////////
 //Weights that are taken into account in the model
+#define W_FEASIBILITY 1e4
 //Penalization for unfulfilled constraint per day ->Daily constraints
 #define WEIGHT_DAY 1.0e6  
-//Penalization for unfunfilled constraint globally (all the days) -->Global constraints
-#define W_VAR_GLOBAL 100
-//Penalization rised by assigning a different category
-#define W_VAR_GLOBAL_CAT 1
-
-#define W_VAR_BREAKFAST 1
-#define W_VAR_MORNING_SNACK 1
-#define W_VAR_STARTER 1
-#define W_VAR_MAIN_COURSE 1
-#define W_VAR_EVENING_SNACK 1
-#define W_VAR_DINNER 1
-
 
 #endif

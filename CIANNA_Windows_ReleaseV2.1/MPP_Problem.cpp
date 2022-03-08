@@ -36,7 +36,7 @@ void MPP_Problem::load_data(int argc, char **argv){
     //note: always load constraints before load dishes..
     load_constraints(argv[2]);
     load_dishes(argv[1]);
-
+    num_nutr = (int)v_constraints.size();
     ////reading the information.......
 }
 void MPP_Problem::load_dishes(char *c_filename){
@@ -188,14 +188,20 @@ void MPP_Problem::load_constraints(char *c_filename){
 		cout << "\n\nError. No se ha podido leer el archivo de restricciones."<<endl;
 		exit(EXIT_FAILURE);
 	}
+
 }
 void MPP_Problem::exportcsv(vector<int> &x_var){
    ofstream ofs;
    ofs.open(out_filename.c_str());
    ofs << "DIA ";
+   //This saves the unique times, it is needed since two configuration might have the same times e.g. {dinner, dinne}
    set<int> times_selected_per_day;
-   for(int i = 0; i < g_timesIdPerConf.size(); i++)
-     for(auto t =g_timesIdPerConf[i].begin(); t != g_timesIdPerConf[i].end(); t++) times_selected_per_day.insert(*t);
+   for(auto i:g_timesIdPerConf){
+      for(auto time:i){
+	  times_selected_per_day.insert(time);
+      }
+   }
+
    for(auto a = times_selected_per_day.begin(); a != times_selected_per_day.end(); a++)
    {
 	   if(*a == BREAKFAST_1) ofs << " , DESAYUNO ";
@@ -215,23 +221,23 @@ void MPP_Problem::exportcsv(vector<int> &x_var){
    for(int i = 0; i < nDias; i++)
    {
 	ofs << i+1;
-   	for(auto a = times_selected_per_day.begin(); a != times_selected_per_day.end(); a++)
-	  ofs<< " , "<<v_opt_dishes[(*a)][x_var[i*N_OPT_DAY + (*a)]].description;
-    	   for(auto ij = dic_nut_id.begin(); ij !=  dic_nut_id.end(); ij++)
-	   {
+	for(auto time_id:times_selected_per_day){
+	    ofs<< " , "<<v_opt_dishes[time_id][x_var[i*N_OPT_DAY + time_id]].description;
+	  }
+	   for(auto nutrient:dic_nut_id){
 		ofs <<" , \" (";
-		for(int c = 0; c < g_timesIdPerConf.size(); c++)
-		{
-		double sum_nut = 0.0;
-     		  for(auto t = g_timesIdPerConf[c].begin(); t != g_timesIdPerConf[c].end(); t++)
-	              sum_nut +=v_opt_dishes[*t][x_var[i*N_OPT_DAY + (*t)]].v_nutrient_value[ij->second];
+		for(int c = 0; c < g_timesIdPerConf.size(); c++){
+		  double sum_nut = 0.0;
+		  for(int time_idx=0; time_idx<g_timesIdPerConf[c].size(); time_idx++)
+	              sum_nut +=v_opt_dishes[time_idx][x_var[i*N_OPT_DAY + time_idx]].v_nutrient_value[nutrient.second];
 			if( c>0) ofs<<",";
 			ofs <<sum_nut ;
 		}
- 		 ofs<<") ["<<v_constraints[ij->second].min<<","<<v_constraints[ij->second].max<<"] \"" ;
+ 		 ofs<<") ["<<v_constraints[nutrient.second].min<<","<<v_constraints[nutrient.second].max<<"] \"" ;
 	   }
 	ofs<<"\n";
    }
    ofs.close();
+
 }
 

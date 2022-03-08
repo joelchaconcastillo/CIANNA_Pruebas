@@ -31,7 +31,8 @@ struct Neighbor_swap{
 struct Solution_LS{
    set<int> badDays;
    int heaviestNut, heaviestType;
-   vector<double> obj_values;
+   vector<double> objFeasibility;
+   vector<pair<double, double> > objVariability;
    vector<int> x_var;
    vector< vector<double> > globalPlan;
    vector< vector< vector<double> > > nutriment_per_day;
@@ -46,7 +47,8 @@ class MPP:public MPP_Problem{
     ~MPP(){}
      //These functions are defined in "Model.cpp"
     void evaluate();
-    void evaluate(vector<int> &sol, vector<double> &objs);
+    void evaluate(vector<int> &sol, vector<double> &objFeas, vector<pair<double, double> > &objVar);
+    double modelation(vector<double> &objFeas, vector<pair<double, double> > &objVar);
 
     //These functions are dfined in "recomb.cpp"
     void dependentMutation(double pm);
@@ -57,9 +59,10 @@ class MPP:public MPP_Problem{
 
     //These functions are defined in "localsearches.cpp"
     double localSearch(double finalTime, bool isMeasuringTime=false);
-    void  First_Improvement_Hill_Climbing_Day(vector<Neighbor> &neighbors, vector<int> &best_solution, double &best_feasibility);
-    void First_Improvement_Hill_Climbing_swap(vector<Neighbor_swap> &neighbors, vector<int> &best_sol, vector<double> &best_objs);
-    void First_Improvement_Hill_Climbing(vector<Neighbor> &neighbors, vector<int> &current_sol, vector<double> &objs);
+    void  First_Improvement_Hill_Climbing(vector<Neighbor> &neighbors, vector<int> &best_sol, vector<double> &bestFeas, vector<pair<double, double> > &bestVar);
+
+    void First_Improvement_Hill_Climbing_swap(vector<Neighbor_swap> &neighbors, vector<int> &best_sol, vector<double> &bestFeas, vector<pair<double, double> > &bestVar);
+    void  First_Improvement_Hill_Climbing_Day(vector<Neighbor> &oneDayneighbors, vector<int> &best_solution, double &best_feasibility);
     void oneDaylocalSearch(vector<int> &solution, int day);
 
     //These functinos are defined in "MPP.cpp"
@@ -83,21 +86,22 @@ class MPP:public MPP_Problem{
   private:
     void calculateFeasibilityDegree(vector<int> &sol, double &feas_day, double &feas_global);
     void init_incremental_evaluation(struct Solution_LS &current);
-    void inc_eval(struct Solution_LS &current, Neighbor &new_neighbor, vector<double> &new_objs);
-    void update_inc(struct Solution_LS &current, Neighbor &new_neighbor, vector<double> &new_objs);
+    void inc_eval(struct Solution_LS &current, Neighbor &new_neighbor, vector<double> &new_objs, vector<pair<double, double> > &newVariability);
+    void update_inc(struct Solution_LS &current, Neighbor &neighbor, vector<double> &newFeas, vector<pair<double, double> > &newVar);
     void swap_days(vector<int> &data, int day1, int day2);
     void perturb_opt(vector<int> &data, int day, int which);
     void perturb_day(vector<int> &data, int day);
-    double f(pair<int, int> data_dcn);
+    double normalize_dcn(pair<int, int> data_dcn);
     void update_dcn_pair(int diff, pair<int, int> &p_dcn);
-    void calculateVariability(vector<int> &sol, vector<double> &objs);
-    bool comp_objs(vector<double> &variability_v1, vector<double> &variability_v2);
+    void calculateVariability(vector<int> &sol, vector<pair<double, double> > &objVar);
+    bool comp_objs(vector<double> &objFeas1, vector<pair<double, double> > &objVar1, vector<double> &objFeas2, vector<pair<double, double> > &objVar2);
     //calculate neighbourhoods that are considered in each local search..
     void init_neighbours();
 
     int heaviestNut, heaviestType;
     double valorFac, variabilidadObj;//factibility and variability of the current solution..
-    vector<double> obj_values;//{feasiblity, varibility x times}
+    vector<double> objFeasibility;//{feasiblity, varibility x times}
+    vector<pair<double, double> > objVariability;
     set<int> badDaysFeas, badDaysVar;
     //These vectors save neighbourhood which are considered into the local searches
     vector<Neighbor> neighbors, oneDayneighbors;

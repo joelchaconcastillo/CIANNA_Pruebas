@@ -36,12 +36,12 @@ void MPP::pairBasedCrossover(MPP &i2)
 	vector<Food> pendingI1, pendingI2;
 	map<Food, int> f1;
 	for (int i = 0; i < nDias; i++){
-		Food f;
+		Food f(N_OPT_DAY);
 		for(int j = 0; j < N_OPT_DAY; j++) f.p[j] = x_var[i*N_OPT_DAY+j];
 		f1[f]++;
 	}
 	for (int i = 0; i < nDias; i++){
-		Food f;
+		Food f(N_OPT_DAY);
 
 		for(int j = 0; j < N_OPT_DAY; j++) f.p[j] = i2.x_var[i*N_OPT_DAY+j];
 		if (f1.count(f)){//Comida en ambos
