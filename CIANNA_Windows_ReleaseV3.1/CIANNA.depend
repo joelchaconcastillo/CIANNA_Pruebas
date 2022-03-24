@@ -1,0 +1,29 @@
+# depslib dependency file v1.0
+1587017177 source:c:\users\jcc\documents\cianna\main.cpp
+	"MA.h"
+
+1587017177 c:\users\jcc\documents\cianna\ma.h
+	"MPP.h"
+
+1587017177 c:\users\jcc\documents\cianna\mpp.h
+	<bits/stdc++.h>
+
+1587017177 source:c:\users\jcc\documents\cianna\ma.cpp
+	<sys/time.h>
+	<iostream>
+	<signal.h>
+	"MA.h"
+	"utils.h"
+
+1587017177 c:\users\jcc\documents\cianna\utils.h
+
+1587017177 source:c:\users\jcc\documents\cianna\utils.cpp
+	<stdlib.h>
+
+1587082450 source:c:\users\jcc\documents\cianna\mpp.cpp
+	<chrono>
+	<sys/time.h>
+	<string>
+	"MPP.h"
+	"utils.h"
+
